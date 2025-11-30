@@ -2,6 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 import uuid
 
 
@@ -10,7 +11,7 @@ class CustomLogger:
 
     def __init__(self,
                  name: str = "email_rewriter",
-                 log_dir: str = None,
+                 log_dir: Optional[Path] = None,
                  max_bytes: int = 10_000_000,  # 10MB
                  backup_count: int = 5):
 
@@ -78,7 +79,7 @@ class CustomLogger:
         """Log API response data"""
         self.logger.info(f"Response sent: {data}")
 
-    def log_error(self, error: Exception, context: dict = None):
+    def log_error(self, error: Exception, context: Optional[dict] = None):
         """Log error with context"""
         error_msg = f"Error occurred: {str(error)}"
         if context:
@@ -91,38 +92,13 @@ class CustomLogger:
         prompt_tokens = usage.get('prompt_tokens', 0)
         completion_tokens = usage.get('completion_tokens', 0)
         total_tokens = usage.get('total_tokens', 0)
-
-        # Approximate cost calculation (adjust rates as needed)
-        prompt_cost = (prompt_tokens * 0.0015) / 1000  # $0.0015 per 1k tokens
-        completion_cost = (completion_tokens * 0.002) / \
-            1000  # $0.002 per 1k tokens
-        total_cost = prompt_cost + completion_cost
+        cost_usd = usage.get('cost_usd', 0)  # Get cost from service layer
 
         self.logger.info(
             f"API Usage - Prompt Tokens: {prompt_tokens}, "
             f"Completion Tokens: {completion_tokens}, "
             f"Total Tokens: {total_tokens}, "
-            f"Estimated Cost: ${total_cost:.4f}"
-        )
-
-    def cleanup_old_logs(self, max_days: int = 30):
-        """Clean up log files older than max_days"""
-        log_dir = Path(self.logger.handlers[0].baseFilename).parent
-        current_time = datetime.now().timestamp()
-
-        for log_file in log_dir.glob("*.log*"):
-            file_age_days = (
-                current_time - log_file.stat().st_mtime) / (24 * 3600)
-            if file_age_days > max_days:
-                log_file.unlink()
-                self.logger.info(f"Removed old log file: {log_file.name}")
-
-    def log_performance(self, start_time: float, end_time: float):
-        """Log performance metrics"""
-        duration = end_time - start_time
-        self.logger.info(
-            f"Performance - Total Duration: {duration:.2f}s, "
-            f"Request ID: {self.request_id}"
+            f"Cost: ${cost_usd:.4f}"
         )
 
     def info(self, message: str):

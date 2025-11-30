@@ -10,6 +10,7 @@ from typing import Optional, Dict, Any, List
 import os
 from openai import AsyncOpenAI
 from utils.prompt_templates import prompt_templates
+from config.pricing import get_model_pricing
 
 
 class EmailService(EmailServiceInterface):
@@ -31,9 +32,12 @@ class EmailService(EmailServiceInterface):
             client: Optional AsyncOpenAI client for dependency injection
         """
         self._client = client
-        self.model = os.getenv('MODEL_NAME', 'gpt-4')
+        # Default to GPT-4o-mini (most cost-effective)
+        self.model = os.getenv('MODEL_NAME', 'gpt-4o-mini')
         self.max_tokens = int(os.getenv('MAX_TOKENS', '2000'))
         self.temperature = float(os.getenv('TEMPERATURE', '0.7'))
+        # Get dynamic pricing for the model
+        self.pricing = get_model_pricing(self.model)
 
     @property
     def client(self) -> AsyncOpenAI:
@@ -100,13 +104,10 @@ class EmailService(EmailServiceInterface):
         if not usage_data:
             raise ValueError("OpenAI returned no usage data")
 
-        # Calculate cost (approximate rates for GPT-4)
-        input_cost_per_1k = 0.03  # $0.03 per 1K input tokens
-        output_cost_per_1k = 0.06  # $0.06 per 1K output tokens
-
-        input_cost = (usage_data.prompt_tokens / 1000) * input_cost_per_1k
+        # Calculate cost using dynamic pricing from config
+        input_cost = (usage_data.prompt_tokens / 1000) * self.pricing['input']
         output_cost = (usage_data.completion_tokens / 1000) * \
-            output_cost_per_1k
+            self.pricing['output']
         total_cost = input_cost + output_cost
 
         return {
@@ -165,9 +166,10 @@ class EmailService(EmailServiceInterface):
         if not usage_data:
             raise ValueError("OpenAI returned no usage data")
 
-        # Calculate cost
-        input_cost = (usage_data.prompt_tokens / 1000) * 0.03
-        output_cost = (usage_data.completion_tokens / 1000) * 0.06
+        # Calculate cost using dynamic pricing from config
+        input_cost = (usage_data.prompt_tokens / 1000) * self.pricing['input']
+        output_cost = (usage_data.completion_tokens / 1000) * \
+            self.pricing['output']
 
         return {
             "content": rewritten_content,

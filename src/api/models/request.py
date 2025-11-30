@@ -18,7 +18,7 @@ class EmailRewriteRequest(BaseModel):
 
     target_audience: str = Field(
         ...,
-        min_length=50,
+        min_length=25,
         max_length=2000,
         description="The context or audience for email rewriting"
     )

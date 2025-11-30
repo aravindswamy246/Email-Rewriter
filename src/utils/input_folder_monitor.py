@@ -7,7 +7,6 @@ import logging
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
-import aiofiles
 from .file_handler import validate_file_type, process_input_folder_file, save_output_file
 
 

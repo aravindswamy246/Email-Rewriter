@@ -19,17 +19,6 @@ except ImportError:
     DOCX_AVAILABLE = False
 
 
-async def read_file_async(file_path: Path) -> str:
-    """Read a file asynchronously."""
-    async with aiofiles.open(file_path, 'r') as f:
-        return await f.read()
-
-
-def read_file(file_path: Path) -> str:
-    """Synchronous file reading for backward compatibility."""
-    return file_path.read_text()
-
-
 def extract_text_from_pdf(file: BinaryIO) -> str:
     """Extract text from PDF file."""
     if not PDF_AVAILABLE:

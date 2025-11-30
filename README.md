@@ -18,6 +18,8 @@ A production-ready FastAPI application that rewrites emails using OpenAI GPT mod
 ### Advanced Features
 - ✅ **Jinja2 Prompt Templates**: Structured, maintainable prompt engineering
 - ✅ **Cost Tracking**: Real-time token usage and cost calculation
+- ✅ **Dynamic Pricing**: Centralized pricing config for all OpenAI models
+- ✅ **GPT-4o-mini Default**: Most cost-effective model (97% cheaper than GPT-4)
 - ✅ **Optimized Logging**: Clean output with cost/time metrics
 - ✅ **Industry-standard logging** with request ID tracking
 - ✅ **Rate limiting** per client IP (configurable)
@@ -60,7 +62,7 @@ Create a `.env` file in the project root:
 OPENAI_API_KEY=sk-your-key-here
 
 # Optional (with defaults)
-MODEL_NAME=gpt-4
+MODEL_NAME=gpt-4o-mini  # Most cost-effective: $0.00015/$0.0006 per 1K tokens
 MAX_TOKENS=2000
 TEMPERATURE=0.7
 LOG_LEVEL=INFO
@@ -253,15 +255,32 @@ See [RENDER_DEPLOYMENT_GUIDE.md](RENDER_DEPLOYMENT_GUIDE.md) for detailed instru
 
 ### Docker Deployment
 
+**Using Docker Compose (Recommended):**
 ```bash
-# Build image
-docker build -t email-rewriter .
+# Start container (builds automatically if needed)
+docker compose up -d
 
-# Run container
-docker run -p 8000:8000 --env-file .env email-rewriter
+# View logs in real-time
+docker compose logs -f
+
+# Stop container
+docker compose down
+
+# Rebuild after code changes
+docker compose up -d --build
 ```
 
-See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for more options.
+**Why Docker Compose?**
+- ✅ Manages everything from `docker-compose.yml`
+- ✅ Handles networking, volumes, environment automatically
+- ✅ One command does it all
+- ✅ Auto-reload on code changes (no rebuild needed for `.py` files)
+
+**Access your API:**
+- Swagger UI: http://localhost:8000/docs
+- Health check: http://localhost:8000/health
+
+See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for troubleshooting and advanced options.
 
 ## 📝 Environment Variables
 
@@ -269,7 +288,7 @@ See [DOCKER_GUIDE.md](DOCKER_GUIDE.md) for more options.
 - `OPENAI_API_KEY`: Your OpenAI API key
 
 ### Optional
-- `MODEL_NAME`: GPT model to use (default: gpt-4)
+- `MODEL_NAME`: GPT model to use (default: gpt-4o-mini - most cost-effective)
 - `MAX_TOKENS`: Maximum tokens per request (default: 2000)
 - `TEMPERATURE`: Response creativity (default: 0.7)
 - `LOG_LEVEL`: Logging level (default: INFO)

@@ -25,7 +25,6 @@ setup(
     install_requires=[
         "openai>=2.6.0",
         "python-dotenv>=1.0.0",
-        "click>=8.0.0",
         "fastapi>=0.120.0",
         "uvicorn[standard]>=0.34.0",
         "pydantic>=2.0.0",
