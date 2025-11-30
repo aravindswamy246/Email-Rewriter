@@ -9,7 +9,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false  # Set manually for security
       - key: MODEL_NAME
-        value: gpt-4
+        value: gpt-4o-mini  # Updated to most cost-effective model
       - key: MAX_TOKENS
         value: "2000"
       - key: TEMPERATURE
